@@ -706,15 +706,14 @@ system_security_audit() {
         /var/log/auth.log /var/log/secure /var/log/audit/audit.log 2>/dev/null | \
         awk -F: '{sum+=$2}END{print sum+0}')
 
-    # Open/listening TCP ports
-    METRIC_OPEN_PORTS=$(ss -tlnp 2>/dev/null | grep -c LISTEN || netstat -tlnp 2>/dev/null | grep -c LISTEN || echo 0)
+    # Open/listening TCP ports [FIXED LINE]
+    METRIC_OPEN_PORTS=$( { ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null; } | grep -c LISTEN )
 
     # Listening services
     METRIC_LISTENING_SVCS=$METRIC_OPEN_PORTS
 
-    # Pending security updates
-    METRIC_PENDING_UPDATES=$(apt list --upgradable 2>/dev/null | grep -c security || \
-        yum list updates 2>/dev/null | grep -c security || echo 0)
+    # Pending security updates [FIXED LINE]
+    METRIC_PENDING_UPDATES=$( { apt list --upgradable 2>/dev/null || yum list updates 2>/dev/null; } | grep -c security )
 
     # Running processes
     METRIC_RUNNING_PROCS=$(ps aux 2>/dev/null | wc -l)
