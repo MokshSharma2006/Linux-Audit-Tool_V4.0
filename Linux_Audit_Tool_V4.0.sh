@@ -1333,7 +1333,7 @@ show_help() {
     echo ""
     echo "Recommended: sudo $0"
 }
-#New
+
 # Argument parsing
 while [[ $# -gt 0 ]]; do
     case $1 in
