@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Security Audit Dashboard — lubuntu-vmwarevirtualplatform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;--text:#f1f5f9;--muted:#94a3b8;
+    --green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7;
+    --cyan:#06b6d4;--border:#334155;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;padding:24px}
+  h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+  h2{font-size:1rem;font-weight:600;color:var(--muted);margin-bottom:16px}
+  h3{font-size:.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+  .meta{font-size:.8rem;color:var(--muted)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+  .grid{display:grid;gap:16px;margin-bottom:24px}
+  .grid-4{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .grid-2{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  .grid-3{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .stat-val{font-size:2.4rem;font-weight:800;line-height:1;margin-bottom:4px}
+  .stat-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .stat-sub{font-size:.7rem;color:var(--muted);margin-top:4px}
+  .chart-wrap{position:relative;height:220px}
+  .check-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .check-row:last-child{border:none}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .dot-ok{background:var(--green)} .dot-warn{background:var(--yellow)} .dot-bad{background:var(--red)}
+  .check-name{flex:1;font-size:.82rem}
+  .check-val{font-size:.78rem;color:var(--muted);text-align:right}
+  .risk-bar-wrap{height:10px;background:var(--bg3);border-radius:5px;margin-top:8px;overflow:hidden}
+  .risk-bar{height:100%;border-radius:5px;transition:width .5s}
+  .section-title{font-size:.95rem;font-weight:700;color:var(--text);margin:0 0 4px}
+  footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:32px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>&#x1F6E1; Linux Security Audit</h1>
+    <h2>lubuntu-vmwarevirtualplatform &nbsp;&bull;&nbsp; 7.0.0-14-generic &nbsp;&bull;&nbsp; Thu May 28 06:07:25 AM EDT 2026</h2>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:2rem;font-weight:800;color:#f59e0b">30/100</div>
+    <span class="badge" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b55">Risk: Medium</span>
+    <div class="meta" style="margin-top:6px">Audit duration: 56s</div>
+  </div>
+</div>
+
+<!-- ── KPI cards ────────────────────────────────────────── -->
+<div class="grid grid-4">
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--green)">4</div>
+    <div class="stat-label">Open TCP ports</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--yellow)">31</div>
+    <div class="stat-label">SUID binaries</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--green)">0</div>
+    <div class="stat-label">World-writable files</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--green)">0</div>
+    <div class="stat-label">Failed logins</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--green)">0</div>
+    <div class="stat-label">Users w/ empty password</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--green)">1</div>
+    <div class="stat-label">Root-equiv (UID 0)</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--yellow)">30</div>
+    <div class="stat-label">Pending sec. updates</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-val" style="color:var(--cyan)">330</div>
+    <div class="stat-label">Running processes</div>
+  </div>
+
+</div>
+
+<!-- ── Charts row ───────────────────────────────────────── -->
+<div class="grid grid-2">
+
+  <div class="card">
+    <h3>Resource usage</h3>
+    <div class="chart-wrap"><canvas id="resourceChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3>File system risk breakdown</h3>
+    <div class="chart-wrap"><canvas id="fileRiskChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3>Risk score — contributing factors</h3>
+    <div class="chart-wrap"><canvas id="riskRadar"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3>Findings by severity</h3>
+    <div class="chart-wrap"><canvas id="severityChart"></canvas></div>
+  </div>
+
+</div>
+
+<!-- ── Security checklist ───────────────────────────────── -->
+<div class="grid grid-3">
+
+  <div class="card">
+    <h3>Access controls</h3>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">SSH root login</span>
+      <span class="check-val">not-set</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">UID-0 accounts</span>
+      <span class="check-val">1</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">Empty passwords</span>
+      <span class="check-val">0 accounts</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">Failed login attempts</span>
+      <span class="check-val">0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Network &amp; firewall</h3>
+    <div class="check-row">
+      <span class="dot dot-bad"></span>
+      <span class="check-name">UFW firewall</span>
+      <span class="check-val">inactive</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">Open ports</span>
+      <span class="check-val">4 listening</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-warn"></span>
+      <span class="check-name">Security updates</span>
+      <span class="check-val">30 pending</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>MAC &amp; kernel hardening</h3>
+    <div class="check-row">
+      <span class="dot dot-warn"></span>
+      <span class="check-name">SELinux</span>
+      <span class="check-val"></span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">AppArmor</span>
+      <span class="check-val">loaded</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-warn"></span>
+      <span class="check-name">SUID binaries</span>
+      <span class="check-val">31 found</span>
+    </div>
+    <div class="check-row">
+      <span class="dot dot-ok"></span>
+      <span class="check-name">World-writable files</span>
+      <span class="check-val">0 found</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>Generated by Linux Audit Tool v4.0 &mdash; Thu May 28 06:07:25 AM EDT 2026 &mdash; For internal use only</footer>
+
+<script>
+const C={green:'#22c55e',yellow:'#f59e0b',red:'#ef4444',blue:'#3b82f6',purple:'#a855f7',cyan:'#06b6d4',bg3:'#334155',text:'#94a3b8'};
+const defaults={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:C.text,font:{size:11}}}}};
+
+// Resource usage doughnut
+new Chart(document.getElementById('resourceChart'),{
+  type:'doughnut',
+  data:{
+    labels:['CPU load (×10)','Mem used %','Disk used %','Idle'],
+    datasets:[{
+      data:[Math.min(parseFloat('1.84')*10,100).toFixed(1), 19, 29, Math.max(0,100-19)],
+      backgroundColor:[C.purple,C.blue,C.cyan,C.bg3],
+      borderWidth:0,hoverOffset:4
+    }]
+  },
+  options:{...defaults,cutout:'65%'}
+});
+
+// File risk bar
+new Chart(document.getElementById('fileRiskChart'),{
+  type:'bar',
+  data:{
+    labels:['SUID files','World-writable','Empty-pwd users','Root accounts','Failed logins ÷10'],
+    datasets:[{
+      label:'Count',
+      data:[31,0,0,1,Math.round(0/10)],
+      backgroundColor:[C.purple,C.red,C.red,C.yellow,C.yellow],
+      borderRadius:6,borderWidth:0
+    }]
+  },
+  options:{
+    ...defaults,
+    indexAxis:'y',
+    scales:{x:{ticks:{color:C.text},grid:{color:'#334155'}},y:{ticks:{color:C.text},grid:{display:false}}}
+  }
+});
+
+// Risk radar
+new Chart(document.getElementById('riskRadar'),{
+  type:'radar',
+  data:{
+    labels:['SSH','Firewall','Users','Files','MAC/SELinux','Updates'],
+    datasets:[{
+      label:'Risk level',
+      data:[
+        5,
+        80,
+        5,
+        31,
+        15,
+        100
+      ],
+      fill:true,
+      backgroundColor:'rgba(239,68,68,.15)',
+      borderColor:'#ef4444',
+      pointBackgroundColor:'#ef4444',
+      pointRadius:4
+    }]
+  },
+  options:{
+    ...defaults,
+    scales:{r:{ticks:{color:C.text,backdropColor:'transparent',stepSize:25},grid:{color:'#334155'},pointLabels:{color:C.text,font:{size:11}},min:0,max:100}}
+  }
+});
+
+// Severity pie
+const critCount = 1;
+const highCount = 0;
+const medCount  = 2;
+const lowCount  = Math.max(1, 8 - critCount - highCount - medCount);
+new Chart(document.getElementById('severityChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Critical','High','Medium','Low / Info'],
+    datasets:[{
+      data:[critCount,highCount,medCount,lowCount],
+      backgroundColor:[C.red,C.yellow,C.purple,C.green],
+      borderWidth:0,hoverOffset:4
+    }]
+  },
+  options:{...defaults,cutout:'60%'}
+});
+</script>
+</body>
+</html>
