@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Linux Security Audit Tool
+# Linux Audit Tool
 # Version: 4.0
 # Author: Moksh Sharma
 
