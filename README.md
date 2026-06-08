@@ -261,9 +261,9 @@ Linux-Audit-Tool/
 
 Output files (generated at runtime):
 ```
-Linux_security_audit_YYYYMMDD_HHMMSS.txt    # Text report
-Linux_security_audit_YYYYMMDD_HHMMSS.pdf    # PDF report
-Linux_security_audit_YYYYMMDD_HHMMSS.html   # Interactive dashboard
+Linux_security_audit_YYYYMMDD_HHMMSS.txt    # Text Report
+Linux_security_audit_YYYYMMDD_HHMMSS.pdf    # PDF Report
+Linux_security_audit_YYYYMMDD_HHMMSS.html   # Interactive Dashboard
 ```
 
 ---
